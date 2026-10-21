@@ -1,0 +1,585 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lịch phân công vệ sinh 7 ngày</title>
+
+<style>
+:root {
+  color-scheme: light;
+  --green: #16834a;
+  --pale: #eefaf2;
+  --ink: #183326;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f8f4;
+  color: var(--ink);
+}
+
+header {
+  background: var(--green);
+  color: white;
+  padding: 25px 16px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 7px;
+  font-size: clamp(24px, 5vw, 34px);
+}
+
+header p {
+  margin: 0;
+}
+
+main {
+  width: min(100%, 900px);
+  margin: 20px auto;
+  padding: 0 14px 30px;
+}
+
+.panel {
+  background: white;
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 14px #163d2510;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+textarea,
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd8ce;
+  border-radius: 10px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+small {
+  display: block;
+  color: #607568;
+  margin-top: 6px;
+}
+
+.options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.options label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: normal;
+  margin: 0;
+}
+
+.options input[type="checkbox"] {
+  width: auto;
+}
+
+.options input[type="number"] {
+  width: 85px;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.primary {
+  width: 100%;
+  background: var(--green);
+  color: white;
+  margin-top: 16px;
+}
+
+.secondary {
+  background: #e7f2e9;
+  color: #205a37;
+}
+
+button:hover {
+  filter: brightness(.96);
+}
+
+#message {
+  color: #b42318;
+}
+
+.day {
+  border: 1px solid #d5e8d9;
+  border-radius: 13px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.day h3 {
+  background: var(--pale);
+  margin: 0;
+  padding: 13px 15px;
+}
+
+.job {
+  padding: 13px 15px;
+  border-top: 1px solid #e6eee8;
+}
+
+.job strong {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.person {
+  display: inline-block;
+  background: #f1f6f2;
+  border-radius: 8px;
+  padding: 6px 9px;
+  margin: 3px 5px 3px 0;
+}
+
+.muted {
+  color: #63766a;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+@media (max-width: 620px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  textarea {
+    min-height: 140px;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  header {
+    background: white;
+    color: black;
+  }
+
+  .inputs,
+  .actions {
+    display: none !important;
+  }
+
+  main {
+    margin: 0;
+    width: 100%;
+  }
+
+  .panel {
+    box-shadow: none;
+  }
+
+  .day {
+    break-inside: avoid;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🧹 Lịch phân công vệ sinh</h1>
+  <p>Tự động chia lịch đủ 7 ngày</p>
+  <p>Cho phép thành viên được phân công nhiều lần</p>
+</header>
+
+<main>
+
+  <section class="panel inputs">
+
+    <div class="grid">
+
+      <div>
+        <label for="people">Danh sách thành viên</label>
+
+        <textarea id="people"
+          placeholder="Nguyễn Văn An&#10;Trần Thị Bình&#10;Lê Minh Châu&#10;Phạm Gia Huy"></textarea>
+
+        <small>Mỗi người viết trên một dòng.</small>
+      </div>
+
+      <div>
+        <label for="jobs">Công việc vệ sinh</label>
+
+        <textarea id="jobs"
+          placeholder="Quét lớp&#10;Lau bảng&#10;Đổ rác&#10;Lau cửa sổ"></textarea>
+
+        <small>Mỗi công việc viết trên một dòng.</small>
+      </div>
+
+    </div>
+
+    <div class="options">
+
+      <label for="perJob">
+        Số người mỗi công việc/ngày:
+      </label>
+
+      <input id="perJob"
+        type="number"
+        min="1"
+        value="2">
+
+      <label>
+        <input id="avoidSameDay"
+          type="checkbox"
+          checked>
+        Hạn chế giao một người nhiều việc trong cùng ngày
+      </label>
+
+    </div>
+
+    <button class="primary" onclick="makeSchedule()">
+      🎲 Tạo lịch 7 ngày
+    </button>
+
+    <p id="message" role="status"></p>
+
+  </section>
+
+  <section class="panel">
+
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+
+      <div>
+        <h2 style="margin:0">📅 Lịch cả tuần</h2>
+        <p class="muted">
+          Từ thứ Hai đến Chủ nhật
+        </p>
+      </div>
+
+      <div class="actions" style="margin:0">
+        <button class="secondary" onclick="copySchedule()">
+          📋 Sao chép
+        </button>
+
+        <button class="secondary" onclick="window.print()">
+          🖨️ In lịch
+        </button>
+      </div>
+
+    </div>
+
+    <div id="result">
+      <p class="muted">
+        Nhập thành viên và công việc rồi nhấn Tạo lịch 7 ngày.
+      </p>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+const days = [
+  "Thứ Hai",
+  "Thứ Ba",
+  "Thứ Tư",
+  "Thứ Năm",
+  "Thứ Sáu",
+  "Thứ Bảy",
+  "Chủ nhật"
+];
+
+let lastSchedule = [];
+
+function getLines(id) {
+  return document.getElementById(id)
+    .value
+    .split(/\r?\n/)
+    .map(text => text.trim())
+    .filter(Boolean);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [array[i], array[j]] =
+      [array[j], array[i]];
+  }
+
+  return array;
+}
+
+function makeSchedule() {
+  const people = getLines("people");
+  const jobs = getLines("jobs");
+
+  const perJob = Math.max(
+    1,
+    parseInt(
+      document.getElementById("perJob").value,
+      10
+    ) || 1
+  );
+
+  const avoidSameDay =
+    document.getElementById("avoidSameDay").checked;
+
+  const message = document.getElementById("message");
+  const result = document.getElementById("result");
+
+  message.textContent = "";
+  result.replaceChildren();
+  lastSchedule = [];
+
+  if (people.length === 0 || jobs.length === 0) {
+    message.textContent =
+      "Vui lòng nhập ít nhất một thành viên và một công việc.";
+    return;
+  }
+
+  if (perJob > people.length && avoidSameDay) {
+    message.textContent =
+      "Số người mỗi công việc lớn hơn số thành viên. " +
+      "Một người có thể phải nhận nhiều lượt trong cùng công việc.";
+  }
+
+  // Đếm tổng số lượt phân công của từng người.
+  const counts = new Map(
+    people.map(person => [person, 0])
+  );
+
+  const schedule = [];
+
+  // Tạo lịch đủ 7 ngày.
+  for (let d = 0; d < 7; d++) {
+
+    const usedToday = new Set();
+    const dayJobs = [];
+
+    for (const job of jobs) {
+
+      const assigned = [];
+
+      for (let slot = 0; slot < perJob; slot++) {
+
+        // Không lặp tên trong cùng một công việc.
+        let candidates = people.filter(
+          person => !assigned.includes(person)
+        );
+
+        if (candidates.length === 0) {
+          break;
+        }
+
+        // Ưu tiên người chưa làm việc nào trong ngày.
+        if (avoidSameDay) {
+          const unused = candidates.filter(
+            person => !usedToday.has(person)
+          );
+
+          if (unused.length > 0) {
+            candidates = unused;
+          }
+        }
+
+        // Ưu tiên người có tổng lượt ít nhất.
+        const minCount = Math.min(
+          ...candidates.map(
+            person => counts.get(person)
+          )
+        );
+
+        const balanced = candidates.filter(
+          person => counts.get(person) === minCount
+        );
+
+        // Chọn ngẫu nhiên trong nhóm ít lượt nhất.
+        const person = balanced[
+          Math.floor(Math.random() * balanced.length)
+        ];
+
+        assigned.push(person);
+        usedToday.add(person);
+
+        counts.set(
+          person,
+          counts.get(person) + 1
+        );
+      }
+
+      dayJobs.push({
+        job: job,
+        assigned: assigned
+      });
+    }
+
+    schedule.push({
+      day: days[d],
+      jobs: dayJobs
+    });
+  }
+
+  lastSchedule = schedule;
+
+  // Hiển thị lịch.
+  for (const day of schedule) {
+
+    const card = document.createElement("section");
+    card.className = "day";
+
+    const heading = document.createElement("h3");
+    heading.textContent = "📆 " + day.day;
+
+    card.appendChild(heading);
+
+    for (const task of day.jobs) {
+
+      const row = document.createElement("div");
+      row.className = "job";
+
+      const title = document.createElement("strong");
+      title.textContent = "🧹 " + task.job;
+
+      row.appendChild(title);
+
+      if (task.assigned.length === 0) {
+        const note = document.createElement("p");
+        note.textContent = "Chưa có người phù hợp.";
+        row.appendChild(note);
+      }
+
+      for (const person of task.assigned) {
+
+        const tag = document.createElement("span");
+        tag.className = "person";
+        tag.textContent = person;
+
+        row.appendChild(tag);
+      }
+
+      const count = document.createElement("small");
+      count.textContent =
+        "Số người: " + task.assigned.length;
+
+      row.appendChild(count);
+      card.appendChild(row);
+    }
+
+    result.appendChild(card);
+  }
+
+  // Thống kê số lượt của từng thành viên.
+  const summary = document.createElement("div");
+  summary.className = "day";
+
+  const summaryTitle = document.createElement("h3");
+  summaryTitle.textContent = "📊 Tổng số lượt mỗi thành viên";
+
+  summary.appendChild(summaryTitle);
+
+  const sortedPeople = [...people].sort(
+    (a, b) => counts.get(b) - counts.get(a)
+  );
+
+  for (const person of sortedPeople) {
+    const row = document.createElement("div");
+    row.className = "job";
+
+    row.textContent =
+      person + ": " + counts.get(person) + " lượt";
+
+    summary.appendChild(row);
+  }
+
+  result.appendChild(summary);
+
+  const note = document.createElement("p");
+  note.className = "muted";
+
+  note.textContent =
+    "Đã tạo đủ 7 ngày. Thành viên có thể lặp lại; " +
+    "hệ thống ưu tiên chia đều tổng số lượt.";
+
+  result.prepend(note);
+}
+
+function copySchedule() {
+  const message = document.getElementById("message");
+
+  if (lastSchedule.length === 0) {
+    message.textContent =
+      "Hãy tạo lịch trước khi sao chép.";
+    return;
+  }
+
+  const text = lastSchedule.map(day => {
+    return day.day + "\n" +
+      day.jobs.map(task =>
+        task.job + ": " + task.assigned.join(", ")
+      ).join("\n");
+  }).join("\n\n");
+
+  const area = document.createElement("textarea");
+  area.value = text;
+
+  document.body.appendChild(area);
+  area.select();
+
+  try {
+    const success = document.execCommand("copy");
+
+    message.textContent = success
+      ? "Đã sao chép lịch 7 ngày."
+      : "Không sao chép được. Hãy sao chép thủ công.";
+  } catch (error) {
+    message.textContent =
+      "Không sao chép được. Hãy sao chép thủ công.";
+  }
+
+  area.remove();
+}
+</script>
+
+</body>
+</html>
